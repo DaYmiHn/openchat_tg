@@ -48,7 +48,10 @@ export class AiRouter {
     const { user } = getContext();
 
     const message_id = await this.sendThinkingMessage();
-    const stream = await this.openChatService.getStream(text, user.chat_id);
+    const stream = await this.openChatService.getStream(
+      text + ', ответ напиши на русском',
+      user.chat_id,
+    );
 
     let respSafe = '';
     let resp = '';
@@ -58,10 +61,10 @@ export class AiRouter {
       respSafe += Buffer.from(chunk)
         .toString()
         .replace(/`/gim, '\\`')
-        .replace(/\[/gim, '\\`');
+        .replace(/\[/gim, '\\[');
       resp += Buffer.from(chunk).toString();
       const currentTime = new Date().getTime();
-      if (currentTime - lastUpdate > 500) {
+      if (currentTime - lastUpdate > 1000) {
         lastUpdate = currentTime;
 
         this.messageSender
@@ -86,7 +89,7 @@ export class AiRouter {
           })
           .catch(() => {});
       }
-    }, 500);
+    }, 1000);
 
     stream.on('end', () => {
       this.openChatService.addMessageToUserContext(
