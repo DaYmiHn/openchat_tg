@@ -3,14 +3,12 @@ import { OpenChatService } from '@telegrambot/service/openchat.service';
 import { MessageSenderService } from '@telegrambot/messages/messageSender.service';
 import { WaitingMessageService } from '@telegrambot/messages/waitingMessage.service';
 import { Callback, Message, Waiting } from '@telegrambot/router/Decorators';
-import { PrismaService } from '@telegrambot/util/prisma.service';
 
 export class AiRouter {
   constructor(
     public messageSender: MessageSenderService,
     public waitingMessage: WaitingMessageService,
     public openChatService: OpenChatService,
-    public prisma: PrismaService,
   ) {}
 
   @Callback('[ask_ai]')

@@ -5,7 +5,6 @@ import { OpenChatService } from '@telegrambot/service/openchat.service';
 
 import 'reflect-metadata';
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '@telegrambot/util/prisma.service';
 
 import { MixinRouter } from '@telegrambot/router/MixinRouter';
 import { getMetadataFromMixin } from '@telegrambot/router/Decorators';
@@ -16,7 +15,6 @@ export class IndexRouter extends MixinRouter {
     public messageSender: MessageSenderService,
     public waitingMessage: WaitingMessageService,
     public userService: UserService,
-    public prisma: PrismaService,
     public openChatService: OpenChatService,
   ) {
     super();

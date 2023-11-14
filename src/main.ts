@@ -12,8 +12,12 @@ async function bootstrap(config) {
   const app = await NestFactory.create(AppModule);
   await app.listen(5000);
 
-  axios.get(
-    `https://api.telegram.org/bot${config.token}/setWebhook?url=${config.url}`,
-  );
+  axios
+    .get(
+      `https://api.telegram.org/bot${config.token}/setWebhook?url=${config.url}`,
+    )
+    .catch((err) => {
+      // console.error(err)
+    });
 }
 bootstrap(config);

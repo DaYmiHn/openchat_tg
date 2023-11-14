@@ -1,6 +1,5 @@
 import * as asyncHooks from 'async_hooks';
 import { v4 } from 'uuid';
-import { User } from '@prisma/client';
 import { UserService } from '@telegrambot/service/user.service';
 import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { Response, NextFunction } from 'express';
@@ -8,7 +7,7 @@ import { Response, NextFunction } from 'express';
 interface AlsContext {
   requestId: string;
   data: {
-    user: User;
+    user: any;
     callback_id: string | undefined;
     message_id: number;
     new_user: boolean;
@@ -45,7 +44,7 @@ export const getContext = (): AlsContext['data'] => {
   return store.get(asyncHooks.executionAsyncId())?.data;
 };
 
-export const getUser = (): User => {
+export const getUser = (): any => {
   return getContext().user;
 };
 

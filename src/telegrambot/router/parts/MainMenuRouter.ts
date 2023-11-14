@@ -2,13 +2,11 @@ import { getContext } from '@telegrambot/util/ALS';
 import { MessageSenderService } from '@telegrambot/messages/messageSender.service';
 import { WaitingMessageService } from '@telegrambot/messages/waitingMessage.service';
 import { Callback, Waiting, Message } from '@telegrambot/router/Decorators';
-import { PrismaService } from '@telegrambot/util/prisma.service';
 
 export class MainMenuRouter {
   constructor(
     public messageSender: MessageSenderService,
     public waitingMessage: WaitingMessageService,
-    public prisma: PrismaService,
   ) {}
 
   @Message('/start')
@@ -31,14 +29,5 @@ export class MainMenuRouter {
     } else {
       await this.messageSender.sendMessage(user.chat_id, menuPayload);
     }
-  }
-
-  @Message('/clear')
-  public async clear() {
-    console.log('--------- CLEARED ---------');
-    await this.prisma.review.deleteMany({});
-    await this.prisma.usersOnShops.deleteMany({});
-    await this.prisma.shop.deleteMany({});
-    await this.prisma.user.deleteMany({});
   }
 }

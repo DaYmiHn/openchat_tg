@@ -4,7 +4,6 @@ import { IndexRouter } from '@telegrambot/router/IndexRouter';
 import { WaitingMessageService } from '@telegrambot/messages/waitingMessage.service';
 import { UserService } from '@telegrambot/service/user.service';
 import { OpenChatService } from '@telegrambot/service/openchat.service';
-import { PrismaService } from '@telegrambot/util/prisma.service';
 import { TelegramBotController } from '@telegrambot/telegrambot.controller';
 import { GetUserMiddleware } from '@telegrambot/util/ALS';
 import { MiddlewareConsumer, NestModule } from '@nestjs/common';
@@ -12,7 +11,6 @@ import { MiddlewareConsumer, NestModule } from '@nestjs/common';
 @Module({
   controllers: [TelegramBotController],
   providers: [
-    PrismaService,
     MessageSenderService,
     WaitingMessageService,
     IndexRouter,
