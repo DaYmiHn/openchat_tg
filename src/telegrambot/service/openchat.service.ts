@@ -21,25 +21,29 @@ export class OpenChatService implements OpenChatInterface {
     });
   }
 
-  public async send(text: string, chat_id: string) {
+  public async getStream(text: string, chat_id: string) {
     this.addMessageToUserContext(chat_id, 'user', text);
 
-    const completion = await this.api.post('/chat', {
-      model: {
-        id: 'openchat_v3.2_mistral',
-        name: 'OpenChat Aura',
-        maxLength: 24576,
-        tokenLimit: 8192,
+    const completion = await this.api.post(
+      '/chat',
+      {
+        model: {
+          id: 'openchat_v3.2_mistral',
+          name: 'OpenChat Aura',
+          maxLength: 24576,
+          tokenLimit: 8192,
+        },
+        messages: this.usersContext.get(chat_id),
+        key: '',
+        prompt: ' ',
+        temperature: 0.5,
       },
-      messages: this.usersContext.get(chat_id),
-      key: '',
-      prompt: ' ',
-      temperature: 0.5,
-    });
+      {
+        responseType: 'stream',
+      },
+    );
 
-    this.addMessageToUserContext(chat_id, 'assistant', completion?.data);
-
-    return completion?.data as string;
+    return completion.data;
   }
 
   public async addMessageToUserContext(

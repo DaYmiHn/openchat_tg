@@ -28,5 +28,5 @@ export interface FeedbackI {
 }
 
 export interface OpenChatInterface {
-  send(text: string, chat_id: string): Promise<string | null>;
+  getStream(text: string, chat_id: string): Promise<string | null>;
 }

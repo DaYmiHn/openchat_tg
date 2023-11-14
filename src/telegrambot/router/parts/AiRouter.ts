@@ -34,46 +34,73 @@ export class AiRouter {
 
   public async sendThinkingMessage() {
     const { user } = getContext();
-    let counter = 1;
     const sentMessage = (await this.messageSender.sendMessage(user.chat_id, {
       chat_id: user.chat_id,
       text: `Думаю...`,
       parse_mode: 'markdown',
     })) as any;
 
-    const interval = setInterval(async () => {
-      const dots = Array.from(Array(counter).keys())
-        .map(() => '.')
-        .join('');
-
-      this.messageSender.editMessage(sentMessage.data.result.message_id, {
-        chat_id: user.chat_id,
-        text: `Думаю${dots}`,
-        parse_mode: 'markdown',
-      });
-      counter++;
-      if (counter > 3) {
-        counter = 1;
-      }
-    }, 1000);
-
-    return [interval, sentMessage.data.result.message_id];
+    return sentMessage.data.result.message_id;
   }
 
   @Waiting('ask_ai')
   public async waitingAskAi(text: string) {
     const { user } = getContext();
 
-    const [interval, message_id] = await this.sendThinkingMessage();
+    const message_id = await this.sendThinkingMessage();
+    const stream = await this.openChatService.getStream(text, user.chat_id);
 
-    const answer = await this.openChatService.send(text, user.chat_id);
+    let respSafe = '';
+    let resp = '';
+    let lastUpdate = 0;
 
-    clearInterval(interval);
+    stream.on('data', (chunk) => {
+      respSafe += Buffer.from(chunk)
+        .toString()
+        .replace(/`/gim, '\\`')
+        .replace(/\[/gim, '\\`');
+      resp += Buffer.from(chunk).toString();
+      const currentTime = new Date().getTime();
+      if (currentTime - lastUpdate > 500) {
+        lastUpdate = currentTime;
 
-    await this.messageSender.editMessage(message_id, {
-      chat_id: user.chat_id,
-      text: answer,
-      parse_mode: 'markdown',
+        this.messageSender
+          .editMessage(message_id, {
+            chat_id: user.chat_id,
+            text: respSafe,
+            parse_mode: 'markdown',
+          })
+          .catch(() => {});
+      }
+    });
+
+    setInterval(() => {
+      if (lastUpdate === 0) {
+        lastUpdate = new Date().getTime();
+
+        this.messageSender
+          .editMessage(message_id, {
+            chat_id: user.chat_id,
+            text: respSafe,
+            parse_mode: 'markdown',
+          })
+          .catch(() => {});
+      }
+    }, 500);
+
+    stream.on('end', () => {
+      this.openChatService.addMessageToUserContext(
+        user.chat_id,
+        'assistant',
+        resp,
+      );
+      this.messageSender
+        .editMessage(message_id, {
+          chat_id: user.chat_id,
+          text: resp,
+          parse_mode: 'markdown',
+        })
+        .catch(() => {});
     });
   }
 
