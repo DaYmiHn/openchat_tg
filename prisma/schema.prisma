@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String  @id @default(uuid())
+  chat_id            String  @unique
+  username           String
+  balance            Int     @default(0)
+  timezone           String?
+  notifications_time String?
+  notifications_enable Boolean? @default(true)
+  first_name         String
+  last_name          String?
+
+  shops UsersOnShops[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Shop      Shop[]
+}
+
+model UsersOnShops {
+  shop       Shop     @relation(fields: [shop_id], references: [id])
+  shop_id    String // relation scalar field (used in the `@relation` attribute above)
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    String // relation scalar field (used in the `@relation` attribute above)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([shop_id, user_id])
+}
+
+model Shop {
+  id       String   @id @default(uuid())
+  name     String?
+  token    String   @unique @default(uuid())
+  api_key  String?  @unique
+  mode     String?
+  sign     String?
+  admin     User     @relation(fields: [admin_id], references: [id])
+  admin_id String
+  reviews  Review[]
+
+  users UsersOnShops[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id           String  @id @default(uuid())
+  confirmed    Boolean @default(false)
+  market_id    String  @unique
+  author       String
+  product_name String
+  rating       Int
+  text         String  @db.Text
+  answer       String? @db.Text
+  message_id   Int?
+  shop         Shop    @relation(fields: [shop_id], references: [id])
+  shop_id      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
