@@ -53,11 +53,7 @@ export class IndexRouter extends MixinRouter {
       return true;
     }
 
-    this.waitingAskAi(chat_id, {
-      text: `Не понимаю, что мне делать =(`,
-      chat_id: chat_id,
-      parse_mode: 'html',
-    });
+    this.waitingAskAi(text);
   }
 
   public async handleCallbackQuery(callback_query: any) {
@@ -77,5 +73,3 @@ export class IndexRouter extends MixinRouter {
     }
   }
 }
-
-// `https://telegram.mihailgok.ru/`

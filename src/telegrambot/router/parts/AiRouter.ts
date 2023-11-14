@@ -34,16 +34,21 @@ export class AiRouter {
     });
   }
 
-  @Waiting('ask_ai')
-  public async waitingAskAi(text: string, message_id: string) {
+  public async sendThinkingMessage() {
     const { user } = getContext();
+    let counter = 1;
+    const sentMessage = (await this.messageSender.sendMessage(user.chat_id, {
+      chat_id: user.chat_id,
+      text: `Думаю...`,
+      parse_mode: 'markdown',
+    })) as any;
 
-    let counter = 3;
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       const dots = Array.from(Array(counter).keys())
         .map(() => '.')
         .join('');
-      this.messageSender.editMessage(message_id, {
+
+      this.messageSender.editMessage(sentMessage.data.result.message_id, {
         chat_id: user.chat_id,
         text: `Думаю${dots}`,
         parse_mode: 'markdown',
@@ -54,14 +59,29 @@ export class AiRouter {
       }
     }, 1000);
 
-    const answer = await this.openChatService.send(text);
+    return [interval, sentMessage.data.result.message_id];
+  }
+
+  @Waiting('ask_ai')
+  public async waitingAskAi(text: string) {
+    const { user } = getContext();
+
+    const [interval, message_id] = await this.sendThinkingMessage();
+
+    const answer = await this.openChatService.send(text, user.chat_id);
 
     clearInterval(interval);
 
-    await this.messageSender.sendMessage(user.chat_id, {
+    await this.messageSender.editMessage(message_id, {
       chat_id: user.chat_id,
       text: answer,
       parse_mode: 'markdown',
     });
+  }
+
+  @Message('/reset')
+  public async resetContext() {
+    const { user } = getContext();
+    await this.openChatService.resetContextByUserChatId(user.chat_id);
   }
 }

@@ -28,5 +28,5 @@ export interface FeedbackI {
 }
 
 export interface OpenChatInterface {
-  send(review: string): Promise<string | null>;
+  send(text: string, chat_id: string): Promise<string | null>;
 }
